@@ -41,6 +41,8 @@ class User(models.Model):
 class Cart(models.Model):
     cart_id = models.UUIDField(primary_key=True, default=uuid4, editable=False, max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
+    # Reverese relationship -> cart_set , food_set
+    
 
 
 class CartItem(models.Model):
@@ -51,6 +53,7 @@ class CartItem(models.Model):
     quantity = models.PositiveSmallIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
 
+ 
 
 class Order(models.Model):
     PAYMENT_STATUS_PENDING = 'P'
