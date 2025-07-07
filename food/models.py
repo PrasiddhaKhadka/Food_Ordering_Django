@@ -53,11 +53,15 @@ class Cart(models.Model):
 
 class CartItem(models.Model):
     # one cart may have multiple cart items
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE,related_name='cart_items')
     # one food may be in multiple cart items
     food = models.ForeignKey(Food, on_delete=models.CASCADE) # db maw basni vaneko --> food_id
     quantity = models.PositiveSmallIntegerField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
+
+
+    class Meta:
+        unique_together = [['cart', 'food']]
 
  
 
@@ -85,8 +89,8 @@ class Order(models.Model):
 class OrderItem(models.Model):
     # one order may have multiple order items =>
     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-    # one food may have multiple order items
-    food = models.ForeignKey(Food, on_delete=models.CASCADE)
+    # one food may be in mutiple order items
+    food = models.ForeignKey(Food, on_delete=models.CASCADE, related_name='orderitems')
     quantity = models.PositiveSmallIntegerField()
 
     def __str__(self) -> str:
@@ -94,4 +98,12 @@ class OrderItem(models.Model):
 
 
 
+class Reviews(models.Model):
+    food = models.ForeignKey(Food, on_delete=models.CASCADE,related_name='reviews')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    description = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ['food', 'user']

@@ -79,3 +79,8 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = ['customer', 'placed_at']
     inlines = [OrderItemInline]
     
+
+@admin.register(models.CartItem)
+class CartItemAdmin(admin.ModelAdmin):
+    list_display = ['cart', 'food', 'quantity']
+    autocomplete_fields = ['food']
