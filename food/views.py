@@ -2,6 +2,7 @@
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -9,9 +10,9 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from food.filters import FoodFilter
 from food.pagination import DefaultPagination
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, DestroyModelMixin
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin, DestroyModelMixin, UpdateModelMixin
 from rest_framework.viewsets import GenericViewSet
-from .serializers import FoodSerializer, CollectionSerializer, ReviewsSerializer, CartSerializer, CartItemSerializer
+from .serializers import FoodSerializer, CollectionSerializer, ReviewsSerializer, CartSerializer, CartItemSerializer, AddItemSerializer, UpdateCartItemSerializer,UserSerializer
 from . import models
 
 
@@ -83,8 +84,42 @@ class CartViewSet(ListModelMixin, CreateModelMixin, RetrieveModelMixin, DestroyM
 
 
 class CartItemViewSet(ModelViewSet):
-    
+
+    http_method_names = ['get', 'post', 'patch', 'delete']
+
     def get_queryset(self):
         return models.CartItem.objects.filter(cart_id = self.kwargs['cart_pk']).select_related('food')
 
-    serializer_class = CartItemSerializer
+    # serializer_class = CartItemSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return AddItemSerializer
+        elif self.request.method == 'PATCH':
+            return UpdateCartItemSerializer
+        else:
+            return CartItemSerializer
+        
+    def get_serializer_context(self):
+        return {
+            'cart_id': self.kwargs['cart_pk']
+        }
+    
+
+class UserViewSet(CreateModelMixin,RetrieveModelMixin, UpdateModelMixin,GenericViewSet):
+    queryset = models.User.objects.all()
+    serializer_class = UserSerializer
+
+
+    # @action(detail=False,methods=['GET','PUT'])
+    # (customer,created) = models.User.objects.get_or_create(user_id = request.user.id)
+    # def me(self, request):
+    #     if request.method == 'GET':
+    #         serializer = UserSerializer(user)
+    #         return Response(serializer.data)
+    #     elif request.method == 'PUT':
+    #         user = models.User.objects.get(user_id = request.user.id)
+    #         serializer = UserSerializer(user,data=request.data)
+    #         serializer.is_valid(raise_exception=True)
+    #         serializer.save()
+    #         return Response(serializer.data)

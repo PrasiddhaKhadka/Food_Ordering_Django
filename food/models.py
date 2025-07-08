@@ -1,4 +1,6 @@
 from django.db import models
+from django.conf import settings
+from django.contrib import admin
 from uuid import uuid4
 
 # Create your models here.
@@ -39,9 +41,18 @@ class User(models.Model):
     phone_no = models.CharField(max_length=10)    
     birthdate = models.DateField()
     membership = models.CharField(max_length=1, choices=MEMBERSHIP_CHOICES, default=MEMBERSHIP_BRONZE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.phone_no
+        return f'{self.user.first_name} {self.user.last_name}'
+    
+    @admin.display(ordering='user__first_name')
+    def user_first_name(self):
+        return self.user.first_name
+    
+    @admin.display(ordering='user__last_name')
+    def user_last_name(self):
+        return self.user.last_name
 
 
 class Cart(models.Model):
@@ -57,7 +68,7 @@ class CartItem(models.Model):
     # one food may be in multiple cart items
     food = models.ForeignKey(Food, on_delete=models.CASCADE) # db maw basni vaneko --> food_id
     quantity = models.PositiveSmallIntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
 
     class Meta:
@@ -84,6 +95,11 @@ class Order(models.Model):
 
     def __str__(self) -> str:
         return f'{self.id}'
+    
+    class Meta:
+        permissions = [
+            ('cancel_order', 'Can Cancel Order')
+        ]
 
 
 class OrderItem(models.Model):

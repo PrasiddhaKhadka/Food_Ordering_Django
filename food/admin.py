@@ -84,3 +84,13 @@ class OrderAdmin(admin.ModelAdmin):
 class CartItemAdmin(admin.ModelAdmin):
     list_display = ['cart', 'food', 'quantity']
     autocomplete_fields = ['food']
+
+
+@admin.register(models.User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ['user_first_name', 'user_last_name','membership']
+    list_editable = ['membership']
+    list_per_page = 5
+    # list_select_related = ['user']
+
+
